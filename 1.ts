@@ -119,6 +119,183 @@
 
 
 
+// 四、泛型
+// 4.1基本使用
+
+// // 普通类型定义
+// type Dog<T> = {name: string, type: T}
+// const dog: Dog<number> = {name:'ww',type:20}
+
+
+// // 类定义
+// class Cat<T> {
+//   private type: T;
+//   constructor(type: T){
+//     this.type = type
+//   }
+// }
+// const cat: Cat<number> = new Cat<number>(20)
+
+
+
+// // 函数定义
+// function swipe<T,U>(value:[T,U]):[U,T]{
+//   return [value[1],value[0]]
+// }
+// swipe<Cat<number>,Dog<number>>([cat,dog])
+
+
+// 泛型的语法格式简单总结如下：
+// 类型名<泛型列表> 具体类型定义
+
+
+
+
+// 4.2泛型推导与默认值
+// type Dog<T> = {name:string,type:T}
+// function adopt<T>(dog:Dog<T>){return dog}
+// const dog = {name:'ww',type:'hsp'}
+// adopt(dog)
+
+// 若不适用函数泛型推导，我们若需要定义变量类型则必须指定泛型类型。
+// const dog: Dog<string> = {name:'sss',type:'dfd'}
+
+// 如果我们想不指定，可以使用泛型默认值的方案。
+// type Dog<T = any> = {name:string,type:T}
+// const dog:Dog = {name:'yy',type:'hu'}
+// dog.type=123
+
+
+// 泛型默认值的语法格式简单总结如下：
+// 泛型名 = 默认类型
+
+
+
+
+// 4.3泛型约束
+// 有的时候，我们可以不用关注泛型具体的类型
+// function fill<T>(length: number,value:T):T[]{
+//   return new Array(length).fill(value)
+// }
+
+// 但是有时候，我们需要限定类型，这时候使用extends关键字即可
+// function sum<T extends number>(value:T[]):number{
+//   let count = 0;
+//   value.forEach(v=>count += v);
+//   return count
+// }
+
+
+// 泛型约束也可以用在多个泛型参数的情况
+// function pick<T,U extends keyof T>(){}
+
+
+// extends 的语法格式简单总结如下，注意下面的类型既可以是一般意义上的类型也可以是泛型
+// 泛型名 extends 类型
+
+
+
+
+// 4.4泛型条件
+// 上面提到 extends，其实也可以当做一个三元运算符
+// T extends U ? X : Y
+// 此时返回的 T，是满足原来的 T 中包含 U 的部分，可以理解为 T 和 U 的交集。
+
+
+// 所以，extends 的语法格式可以扩展为：
+// 泛型名A extends 类型B ? 类型C: 类型D
+
+
+
+
+// 4.5泛型推断 infer
+// type Foo<T> = T extends {t:infer Test } ? Test : string;
+
+// type One = Foo<number> // string，因为number不是一个包含t的对象类型
+// type Two = Foo<{t:boolean}> // boolean，因为泛型参数匹配上了，使用了infer对应的type
+// type Three = Foo<{a:number,t:()=>void}> // () => void，泛型定义是参数的子集，同样适配
+
+
+
+
+// 5泛型工具
+// 5.1Partical<T>
+
+// 此工具的作用就是将泛型中全部属性变为可选的：
+// type Partial<T> = {
+//   [P in keyof T]?: T[P]
+// }
+
+
+
+
+// 5.2Record<K, T>
+// 此工具的作用是将 K 中所有属性值转化为 T 类型，我们常用它来申明一个普通 object 对象。
+// type Record<K extends keyof any, T> = {
+//   [key in K] :T
+// }
+// const obj:Record<string,string> = {name:'bh',tag:'回魔吗'}
+
+
+
+// 5.3Pick<T, K>
+// 此工具的作用是将 T 类型中的 K 键列表提取出来，生成新的子键值对类型。
+// type Pick<T, K extends keyof T> = {
+//   [P in K]: T[P]
+// }
+// const bird: Pick<Animal, 'name'| 'age'> = {name:'bird',age:12}
+
+
+
+
+
+// 5.4Exclude<T, U>
+// 此工具是在 T 类型中，去除 T 类型和 U 类型的交集，返回剩余的部分。
+// type Exclude<T, U> = T extends U ? never : T
+
+// type T1 = Exclude<'a'|'b'|'c','a'|'b'>  // "c"
+// type T2 = Exclude<string | number|(()=>void),Function | boolean>; // string | number
+
+
+
+
+// 5.5Omit<T, K>
+// 此工具可认为是适用于键值对对象的 Exclude，它会去除类型 T 中包含 K 的键值对。
+// 在定义中，第一步先从 T 的 key 中去掉与 K 重叠的 key，接着使用 Pick 把 T 类型和剩余的 key 组合起来即可。
+// type Omit =  Pick<T, Exclude<keyof T,K>>
+// const OmitAnimal:Omit<Animal,'name'|'age'> = {
+//   category: 'lion', eat: () => { console.log('eat') }
+// }
+
+// 可以发现，Omit 与 Pick 得到的结果完全相反，一个是取非结果，一个取交结果。
+
+
+
+
+// 5.6ReturnType<T>
+// 此工具就是获取 T 类型(函数)对应的返回值类型。
+// type ReturnType<T extends (...args:any) =>any> = T extends (...args:any)=> inter R? R :any
+
+// 简化版
+// type ReturnType<T extends Function> = T extends () => inter R? R :any
+
+
+// function foo(x:string|number):string|number {
+//   // ...
+// }
+
+// type FooType = ReturnType<foo>   //// string | number
+
+
+
+
+
+// 5.7Required<T>
+// 此工具可以将类型 T 中所有的属性变为必选项。
+// type Required<T> = {
+//   [P in keyof T]-?: T[P]
+// }
+// 这里有一个很有意思的语法-?，你可以理解为就是 TS 中把?可选属性减去的意思。
 
 
 
